@@ -19,8 +19,7 @@ pipeline {
         HOST_PORT       = "3000"
         CONTAINER_PORT  = "80"
     }
-
-    stages {
+stages {
 
         stage('Checkout') {
             steps {
@@ -102,16 +101,16 @@ pipeline {
                 string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
                 string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
             ]) {
-                sh """
-                    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-                    -d chat_id="${CHAT_ID}" \
+                sh '''
+                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+                    -d chat_id="$CHAT_ID" \
                     -d parse_mode="Markdown" \
                     -d text="✅ *BUILD SUCCESS*
-Job: ${JOB_NAME}
-Build: #${BUILD_NUMBER}
-Image: ${IMAGE_TAG}
-URL: ${BUILD_URL}"
-                """
+Job: $JOB_NAME
+Build: #$BUILD_NUMBER
+Image: $IMAGE_TAG
+URL: $BUILD_URL"
+                '''
             }
         }
         failure {
@@ -119,16 +118,16 @@ URL: ${BUILD_URL}"
                 string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
                 string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
             ]) {
-                sh """
-                    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-                    -d chat_id="${CHAT_ID}" \
+                sh '''
+                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+                    -d chat_id="$CHAT_ID" \
                     -d parse_mode="Markdown" \
                     -d text="❌ *BUILD FAILED*
-Job: ${JOB_NAME}
-Build: #${BUILD_NUMBER}
+Job: $JOB_NAME
+Build: #$BUILD_NUMBER
 Stage: Check console for details
-URL: ${BUILD_URL}"
-                """
+URL: $BUILD_URL"
+                '''
             }
         }
         always {
