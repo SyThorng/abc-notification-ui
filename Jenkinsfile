@@ -121,14 +121,14 @@ pipeline {
             string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
         ]) {
             sh """
-                curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
-                    --data-urlencode "chat_id=\$CHAT_ID" \
-                    --data-urlencode "parse_mode=HTML" \
-                    --data-urlencode "text=❌ <b>BUILD FAILED</b>
-                    Job: ${JOB_NAME}
-                    Build: #${BUILD_NUMBER}
-                    Stage: Check console for details
-                    URL: ${BUILD_URL}"
+    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+    --data-urlencode "chat_id=\$CHAT_ID" \
+    --data-urlencode "parse_mode=HTML" \
+    --data-urlencode "text=❌ <b>BUILD FAILED</b>
+    Job: ${JOB_NAME}
+    Build: #${BUILD_NUMBER}
+    Stage: Check console for details
+    URL: ${BUILD_URL}"
             """
         }
     }
