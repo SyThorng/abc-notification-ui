@@ -3,23 +3,23 @@ pipeline {
 
     environment {
         IMAGE_NAME    = "abc-notification-ui"
-        DOCKER_HUB_ID = "sythorng"          // ← change this
+        DOCKER_HUB_ID = "sythorng"
         IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
         IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
         IMAGE_LATEST  = "${IMAGE_FULL}:latest"
 
-        // Credentials IDs (configured in Jenkins — see setup guide below)
         DOCKERHUB_CRED  = "dockerhub-credentials"
         TELEGRAM_CRED   = "telegram-bot-token"
         TELEGRAM_CHAT   = "telegram-chat-id"
         GCP_SSH_CRED    = "gcp-ssh-key"
-        GCP_HOST        = "34.87.89.201"           // ← change this
-        GCP_USER        = "hostingdevop"              // ← change this (e.g. ubuntu)
+        GCP_HOST        = "34.87.89.201"
+        GCP_USER        = "hostingdevop"
         CONTAINER_NAME  = "abc-notification-ui"
         HOST_PORT       = "3000"
         CONTAINER_PORT  = "80"
     }
-stages {
+
+    stages {
 
         stage('Checkout') {
             steps {
@@ -46,7 +46,7 @@ stages {
                         --no-progress \
                         ${IMAGE_TAG} || true
                 """
-                echo "✅ Trivy scan completed (report only)"
+                echo "✅ Trivy scan completed"
             }
         }
 
@@ -74,6 +74,7 @@ stages {
                     credentialsId: "${GCP_SSH_CRED}",
                     keyFileVariable: 'SSH_KEY'
                 )]) {
+                    // ✅ Use single quotes inside the remote shell to avoid conflicts
                     sh """
                         ssh -o StrictHostKeyChecking=no \
                             -i ${SSH_KEY} \
@@ -86,7 +87,7 @@ stages {
                                     --restart always \
                                     -p ${HOST_PORT}:${CONTAINER_PORT} \
                                     ${IMAGE_LATEST}
-                                echo "Container started: \$(docker ps --filter name=${CONTAINER_NAME} --format "{{.Status}}")"
+                                echo "Container started: \$(docker ps --filter name=${CONTAINER_NAME} --format '\''{{.Status}}'\'')"
                             '
                     """
                 }
@@ -101,35 +102,38 @@ stages {
                 string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
                 string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
             ]) {
-                sh '''
-                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-                    -d chat_id="$CHAT_ID" \
-                    -d parse_mode="Markdown" \
-                    -d text="✅ *BUILD SUCCESS*
-Job: $JOB_NAME
-Build: #$BUILD_NUMBER
-Image: $IMAGE_TAG
-URL: $BUILD_URL"
-                '''
+                // ✅ Use double quotes so Jenkins vars like IMAGE_TAG expand correctly
+                sh """
+                    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+                        --data-urlencode "chat_id=\$CHAT_ID" \
+                        --data-urlencode "parse_mode=Markdown" \
+                        --data-urlencode "text=✅ *BUILD SUCCESS*
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Image: ${IMAGE_TAG}
+URL: ${BUILD_URL}"
+                """
             }
         }
+
         failure {
             withCredentials([
                 string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
                 string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
             ]) {
-                sh '''
-                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-                    -d chat_id="$CHAT_ID" \
-                    -d parse_mode="Markdown" \
-                    -d text="❌ *BUILD FAILED*
-Job: $JOB_NAME
-Build: #$BUILD_NUMBER
+                sh """
+                    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+                        --data-urlencode "chat_id=\$CHAT_ID" \
+                        --data-urlencode "parse_mode=Markdown" \
+                        --data-urlencode "text=❌ *BUILD FAILED*
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
 Stage: Check console for details
-URL: $BUILD_URL"
-                '''
+URL: ${BUILD_URL}"
+                """
             }
         }
+
         always {
             sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
             echo "🧹 Local images cleaned up"
