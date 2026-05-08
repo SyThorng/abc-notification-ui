@@ -69,31 +69,36 @@ pipeline {
         }
 
         stage('Deploy to GCP Instance') {
-            steps {
-                withCredentials([sshUserPrivateKey(
-                    credentialsId: "${GCP_SSH_CRED}",
-                    keyFileVariable: 'SSH_KEY'
-                )]) {
-                    // ✅ Use single quotes inside the remote shell to avoid conflicts
-                    sh """
-                        ssh -o StrictHostKeyChecking=no \
-                            -i ${SSH_KEY} \
-                            ${GCP_USER}@${GCP_HOST} '
-                                docker pull ${IMAGE_LATEST}
-                                docker stop ${CONTAINER_NAME} 2>/dev/null || true
-                                docker rm   ${CONTAINER_NAME} 2>/dev/null || true
-                                docker run -d \
-                                    --name ${CONTAINER_NAME} \
-                                    --restart always \
-                                    -p ${HOST_PORT}:${CONTAINER_PORT} \
-                                    ${IMAGE_LATEST}
-                                echo "Container started: \$(docker ps --filter name=${CONTAINER_NAME} --format '\''{{.Status}}'\'')"
-                            '
-                    """
-                }
-                echo "✅ App deployed on GCP at port ${HOST_PORT}"
-            }
+    steps {
+        withCredentials([sshUserPrivateKey(
+            credentialsId: "${GCP_SSH_CRED}",
+            keyFileVariable: 'SSH_KEY'
+        )]) {
+            sh """
+                ssh -o StrictHostKeyChecking=no \
+                    -o ConnectTimeout=30 \
+                    -i \${SSH_KEY} \
+                    ${GCP_USER}@${GCP_HOST} '
+                        set -e
+                        echo "=== Pulling image ==="
+                        docker pull ${IMAGE_LATEST}
+                        echo "=== Stopping old container ==="
+                        docker stop ${CONTAINER_NAME} 2>/dev/null || true
+                        docker rm   ${CONTAINER_NAME} 2>/dev/null || true
+                        echo "=== Starting new container ==="
+                        docker run -d \
+                            --name ${CONTAINER_NAME} \
+                            --restart always \
+                            -p ${HOST_PORT}:${CONTAINER_PORT} \
+                            ${IMAGE_LATEST}
+                        echo "=== Status ==="
+                        docker ps --filter name=${CONTAINER_NAME}
+                    '
+            """
         }
+        echo "✅ App deployed on GCP at port ${HOST_PORT}"
+    }
+}
     }
 
     post {
