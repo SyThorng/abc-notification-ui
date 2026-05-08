@@ -96,7 +96,7 @@ pipeline {
         }
     }
 
-post {
+    post {
     success {
         withCredentials([
             string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
@@ -136,5 +136,6 @@ URL: ${BUILD_URL}"
     always {
         sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
         echo "🧹 Local images cleaned up"
+    }
     }
 }
