@@ -1,0 +1,499 @@
+/* ── Reset & Base ─────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #f0f2f5;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* ── Login Screen ─────────────────────────────────────── */
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #003087 0%, #0055cc 100%);
+}
+
+.login-card {
+  background: white;
+  border-radius: 20px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.bank-logo { font-size: 52px; margin-bottom: 12px; }
+
+.login-card h1 {
+  font-size: 28px;
+  color: #003087;
+  margin-bottom: 8px;
+}
+
+.login-card p {
+  color: #6c757d;
+  font-size: 14px;
+  margin-bottom: 32px;
+}
+
+.ci-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ci-input:focus { border-color: #003087; }
+
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: #003087;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover { background: #0044bb; }
+
+/* ── App Layout ───────────────────────────────────────── */
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: #f0f2f5;
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.header {
+  background: #003087;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.bank-name { color: white; font-size: 18px; font-weight: 700; }
+
+.ci-badge {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+/* ── Balance Card ─────────────────────────────────────── */
+.balance-card {
+  background: linear-gradient(135deg, #003087, #0055cc);
+  margin: 16px;
+  border-radius: 20px;
+  padding: 28px 24px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+  box-shadow: 0 8px 24px rgba(0,48,135,0.3);
+}
+
+.balance-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+
+.balance-card.incoming { animation: flashGreen 1.5s ease; }
+.balance-card.outgoing { animation: flashRed   1.5s ease; }
+
+@keyframes flashGreen {
+  0%, 100% { background: linear-gradient(135deg, #003087, #0055cc); }
+  40%       { background: linear-gradient(135deg, #0a7a3a, #14a857); }
+}
+
+@keyframes flashRed {
+  0%, 100% { background: linear-gradient(135deg, #003087, #0055cc); }
+  40%       { background: linear-gradient(135deg, #8b1a1a, #cc3333); }
+}
+
+.balance-label {
+  font-size: 13px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.balance-usd {
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.balance-khr {
+  font-size: 16px;
+  opacity: 0.75;
+}
+
+.balance-flash {
+  position: absolute;
+  top: 16px; right: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  animation: fadeInOut 1.5s ease;
+}
+
+.balance-flash.incoming { background: rgba(20,168,87,0.3); }
+.balance-flash.outgoing { background: rgba(204,51,51,0.3); }
+
+@keyframes fadeInOut {
+  0%  { opacity: 0; transform: translateY(-8px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100%{ opacity: 0; }
+}
+
+/* ── Push Section ─────────────────────────────────────── */
+.push-section {
+  margin: 0 16px 16px;
+  text-align: center;
+}
+
+.btn-subscribe {
+  width: 100%;
+  padding: 14px;
+  background: white;
+  color: #003087;
+  border: 2px solid #003087;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-subscribe:hover:not(:disabled) {
+  background: #003087;
+  color: white;
+}
+
+.btn-subscribe:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.subscribed-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+.btn-unsub {
+  background: none;
+  border: 1px solid #2e7d32;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.error-msg {
+  margin-top: 8px;
+  color: #c62828;
+  font-size: 13px;
+}
+
+/* ── Transactions ─────────────────────────────────────── */
+.txn-section { padding: 0 16px 32px; }
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #aaa;
+}
+
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; margin-bottom: 4px; }
+.empty-sub { font-size: 13px; }
+
+.txn-list { display: flex; flex-direction: column; gap: 10px; }
+
+.txn-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  gap: 12px;
+  transition: transform 0.2s;
+}
+
+.txn-item.new {
+  animation: slideIn 0.4s ease;
+  border-left: 3px solid #003087;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.txn-icon { font-size: 28px; flex-shrink: 0; }
+
+.txn-details { flex: 1; min-width: 0; }
+
+.txn-desc {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txn-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #888;
+}
+
+.txn-account { background: #f0f2f5; padding: 2px 6px; border-radius: 4px; }
+
+.txn-amount-col { text-align: right; flex-shrink: 0; }
+
+.txn-amount {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.txn-amount.green { color: #1b8a4a; }
+.txn-amount.red   { color: #c62828; }
+
+.txn-amount-khr {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+/* ── Action Row ───────────────────────────────────────── */
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin: 0 16px 16px;
+}
+
+.btn-action {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border-radius: 14px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn-icon { font-size: 24px; }
+
+.btn-transfer {
+  background: #fff0f0;
+  color: #c62828;
+  border: 1.5px solid #ffcdd2;
+}
+
+.btn-transfer:hover {
+  background: #c62828;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(198,40,40,0.3);
+}
+
+.btn-telegram {
+  background: #e3f2fd;
+  color: #0277bd;
+  border: 1.5px solid #bbdefb;
+}
+
+.btn-telegram:hover {
+  background: #0277bd;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(2,119,189,0.3);
+}
+
+/* ── Transfer Modal ───────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal {
+  background: white;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 24px 40px;
+  width: 100%;
+  max-width: 480px;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.modal-close {
+  background: #f0f2f5;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+}
+
+.modal-balance {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #444;
+  margin-bottom: 20px;
+}
+
+.modal-field {
+  margin-bottom: 16px;
+}
+
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.modal-field input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.modal-field input:focus { border-color: #003087; }
+
+.modal-error   { color: #c62828; font-size: 13px; margin-bottom: 12px; }
+.modal-success { color: #2e7d32; font-size: 13px; margin-bottom: 12px; }
+
+.btn-confirm {
+  width: 100%;
+  padding: 16px;
+  background: #003087;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+
+.btn-confirm:hover:not(:disabled) {
+  background: #0044bb;
+  transform: translateY(-1px);
+}
+
+.btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── Telegram Login Link ───────────────────────────────── */
+.tg-link-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #e3f2fd;
+  color: #0277bd;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.tg-link-login:hover {
+  background: #0277bd;
+  color: white;
+}
