@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         IMAGE_NAME    = "abc-notification-ui"
-        DOCKER_HUB_ID = "your-dockerhub-username"          // ← change this
+        DOCKER_HUB_ID = "sythorng"          // ← change this
         IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
         IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
         IMAGE_LATEST  = "${IMAGE_FULL}:latest"
@@ -13,8 +13,8 @@ pipeline {
         TELEGRAM_CRED   = "telegram-bot-token"
         TELEGRAM_CHAT   = "telegram-chat-id"
         GCP_SSH_CRED    = "gcp-ssh-key"
-        GCP_HOST        = "your.gcp.instance.ip"           // ← change this
-        GCP_USER        = "your-gcp-username"              // ← change this (e.g. ubuntu)
+        GCP_HOST        = "34.87.89.201"           // ← change this
+        GCP_USER        = "hostingdevop"              // ← change this (e.g. ubuntu)
         CONTAINER_NAME  = "abc-notification-ui"
         HOST_PORT       = "3000"
         CONTAINER_PORT  = "80"
@@ -58,12 +58,12 @@ pipeline {
                     usernameVariable: 'DH_USER',
                     passwordVariable: 'DH_PASS'
                 )]) {
-                    sh """
-                        echo "${DH_PASS}" | docker login -u "${DH_USER}" --password-stdin
-                        docker push ${IMAGE_TAG}
-                        docker push ${IMAGE_LATEST}
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker push $IMAGE_TAG
+                        docker push $IMAGE_LATEST
                         docker logout
-                    """
+                    '''
                 }
                 echo "✅ Image pushed: ${IMAGE_TAG}"
             }
