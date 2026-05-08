@@ -137,5 +137,4 @@ URL: ${BUILD_URL}"
         sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
         echo "🧹 Local images cleaned up"
     }
-    }
 }
