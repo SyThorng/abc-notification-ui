@@ -2,8 +2,22 @@ pipeline {
     agent any
 
     environment {
-        DH_IMAGE = "abc-notification-ui"
-        VERSION  = "${GIT_COMMIT[0..7]}"
+        IMAGE_NAME    = "abc-notification-ui"
+        DOCKER_HUB_ID = "sythorng"          // ← change this
+        IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
+        IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
+        IMAGE_LATEST  = "${IMAGE_FULL}:latest"
+
+        // Credentials IDs (configured in Jenkins — see setup guide below)
+        DOCKERHUB_CRED  = "dockerhub-credentials"
+        TELEGRAM_CRED   = "telegram-bot-token"
+        TELEGRAM_CHAT   = "telegram-chat-id"
+        GCP_SSH_CRED    = "gcp-ssh-key"
+        GCP_HOST        = "34.87.89.201"           // ← change this
+        GCP_USER        = "hostingdevop"              // ← change this (e.g. ubuntu)
+        CONTAINER_NAME  = "abc-notification-ui"
+        HOST_PORT       = "3000"
+        CONTAINER_PORT  = "80"
     }
 
     stages {
@@ -11,100 +25,121 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+                echo " Code checked out from GitHub"
             }
         }
 
-        stage('Build Image') {
+        stage('Build Docker Image') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DH_USER',
-                    passwordVariable: 'DH_PASS'
-                )]) {
-                    sh '''
-                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                        docker build -t $DH_USER/abc-notification-ui:$VERSION .
-                        docker tag $DH_USER/abc-notification-ui:$VERSION \
-                                   $DH_USER/abc-notification-ui:latest
-                    '''
+                sh """
+                    docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                """
+                echo "Docker image built: ${IMAGE_TAG}"
+            }
+        }
+
+        stage('Trivy Security Scan') {
+            steps {
+                sh """
+                    trivy image --exit-code 1 \
+                        --severity HIGH,CRITICAL \
+                        --no-progress \
+                        ${IMAGE_TAG}
+                """
+            }
+            post {
+                failure {
+                    echo "❌ Trivy scan FAILED — critical vulnerabilities found"
+                }
+                success {
+                    echo "Trivy scan passed"
                 }
             }
         }
 
-        stage('Trivy Scan') {
+        stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
+                    credentialsId: "${DOCKERHUB_CRED}",
                     usernameVariable: 'DH_USER',
                     passwordVariable: 'DH_PASS'
                 )]) {
-                    sh '''
-                        trivy image \
-                            --severity CRITICAL,HIGH,MEDIUM \
-                            --format table \
-                            --output trivy-report.txt \
-                            --exit-code 0 \
-                            $DH_USER/abc-notification-ui:$VERSION
-                        cat trivy-report.txt
-                    '''
-                }
-            }
-        }
-
-        stage('Push Image') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DH_USER',
-                    passwordVariable: 'DH_PASS'
-                )]) {
-                    sh '''
-                        docker push $DH_USER/abc-notification-ui:$VERSION
-                        docker push $DH_USER/abc-notification-ui:latest
+                    sh """
+                        echo "${DH_PASS}" | docker login -u "${DH_USER}" --password-stdin
+                        docker push ${IMAGE_TAG}
+                        docker push ${IMAGE_LATEST}
                         docker logout
-                    '''
+                    """
                 }
+                echo "Image pushed: ${IMAGE_TAG}"
+            }
+        }
+
+        stage('Deploy to GCP Instance') {
+            steps {
+                withCredentials([sshUserPrivateKey(
+                    credentialsId: "${GCP_SSH_CRED}",
+                    keyFileVariable: 'SSH_KEY'
+                )]) {
+                    sh """
+                        ssh -o StrictHostKeyChecking=no \
+                            -i ${SSH_KEY} \
+                            ${GCP_USER}@${GCP_HOST} '
+                                docker pull ${IMAGE_LATEST}
+                                docker stop ${CONTAINER_NAME} 2>/dev/null || true
+                                docker rm   ${CONTAINER_NAME} 2>/dev/null || true
+                                docker run -d \
+                                    --name ${CONTAINER_NAME} \
+                                    --restart always \
+                                    -p ${HOST_PORT}:${CONTAINER_PORT} \
+                                    ${IMAGE_LATEST}
+                                echo "Container started: \$(docker ps --filter name=${CONTAINER_NAME} --format "{{.Status}}")"
+                            '
+                    """
+                }
+                echo " App deployed on GCP at port ${HOST_PORT}"
             }
         }
     }
 
     post {
-        always {
+        success {
             withCredentials([
-                usernamePassword(
-                    credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'DH_USER',
-                    passwordVariable: 'DH_PASS'
-                ),
-                string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'TG_TOKEN'),
-                string(credentialsId: 'TELEGRAM_CHAT_ID',  variable: 'TG_CHAT')
+                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
             ]) {
-                script {
-                    def status = currentBuild.currentResult
-                    def icon = (status == 'SUCCESS') ? '✅' : '❌'
-                    def msg = "${icon} Build ${status} - abc-notification-ui\n" +
-                              "Image: ${env.DH_USER}/abc-notification-ui:${env.VERSION}\n" +
-                              "Commit: ${env.VERSION}\n" +
-                              "Scanner: Trivy\n" +
-                              "Job: ${env.BUILD_URL}"
-
-                    sh """
-                        curl -s -X POST "https://api.telegram.org/bot\${TG_TOKEN}/sendMessage" \
-                            --data-urlencode "chat_id=\${TG_CHAT}" \
-                            --data-urlencode "text=${msg}" \
-                            --data-urlencode "parse_mode=Markdown"
-                    """
-
-                    if (fileExists('trivy-report.txt')) {
-                        sh """
-                            curl -s -X POST "https://api.telegram.org/bot\${TG_TOKEN}/sendDocument" \
-                                -F "chat_id=\${TG_CHAT}" \
-                                -F "document=@trivy-report.txt" \
-                                -F "caption=Trivy scan - abc-notification-ui:${env.VERSION}"
-                        """
-                    }
-                }
+                sh """
+                    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+                    -d chat_id="${CHAT_ID}" \
+                    -d parse_mode="Markdown" \
+                    -d text="*BUILD SUCCESS*
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Image: ${IMAGE_TAG}
+URL: ${BUILD_URL}"
+                """
             }
+        }
+        failure {
+            withCredentials([
+                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+            ]) {
+                sh """
+                    curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+                    -d chat_id="${CHAT_ID}" \
+                    -d parse_mode="Markdown" \
+                    -d text=" *BUILD FAILED*
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Stage: Check console for details
+URL: ${BUILD_URL}"
+                """
+            }
+        }
+        always {
+            sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
+            echo "🧹 Local images cleaned up"
         }
     }
 }
