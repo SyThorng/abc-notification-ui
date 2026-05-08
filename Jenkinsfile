@@ -11,7 +11,7 @@ pipeline {
         DOCKERHUB_CRED  = "dockerhub-credentials"
         TELEGRAM_CRED   = "telegram-bot-token"
         TELEGRAM_CHAT   = "telegram-chat-id"
-        GCP_SSH_CRED    = "bongtong"
+        GCP_SSH_CRED    = "gcp-ssh-key"
         GCP_HOST        = "34.87.89.201"
         GCP_USER        = "hostingdevop"
         CONTAINER_NAME  = "abc-notification-ui"
@@ -103,11 +103,12 @@ pipeline {
         string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
     ]) {
         sh """
-MSG="✅ <b>BUILD SUCCESS</b>
+MSG="❌ <b>BUILD FAILED</b>
 Job: ${JOB_NAME}
 Build: #${BUILD_NUMBER}
-Image: ${IMAGE_TAG}
-URL: ${BUILD_URL}"
+Stage: Check console for details
+Jenkins: ${BUILD_URL}
+App: http://${GCP_HOST}:${HOST_PORT}"
 
 curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
 --data-urlencode "chat_id=\$CHAT_ID" \
