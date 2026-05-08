@@ -96,47 +96,45 @@ pipeline {
         }
     }
 
-    post {
-        success {
-            withCredentials([
-                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-            ]) {
-                // ✅ Use double quotes so Jenkins vars like IMAGE_TAG expand correctly
-                sh """
-                    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
-                        --data-urlencode "chat_id=\$CHAT_ID" \
-                        --data-urlencode "parse_mode=Markdown" \
-                        --data-urlencode "text=✅ *BUILD SUCCESS*
-                        Job: ${JOB_NAME}
-                        Build: #${BUILD_NUMBER}
-                        Image: ${IMAGE_TAG}
-                        URL: ${BUILD_URL}"
-                """
-            }
+post {
+    success {
+        withCredentials([
+            string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+            string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+        ]) {
+            sh """
+                curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+                    --data-urlencode "chat_id=\$CHAT_ID" \
+                    --data-urlencode "parse_mode=HTML" \
+                    --data-urlencode "text=✅ <b>BUILD SUCCESS</b>
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Image: ${IMAGE_TAG}
+URL: ${BUILD_URL}"
+            """
         }
+    }
 
-        failure {
-            withCredentials([
-                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-            ]) {
-                sh """
-                    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
-                        --data-urlencode "chat_id=\$CHAT_ID" \
-                        --data-urlencode "parse_mode=Markdown" \
-                        --data-urlencode "text=❌ *BUILD FAILED*
-                        Job: ${JOB_NAME}
-                        Build: #${BUILD_NUMBER}
-                        Stage: Check console for details
-                        URL: ${BUILD_URL}"
-                """
-            }
+    failure {
+        withCredentials([
+            string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+            string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+        ]) {
+            sh """
+                curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+                    --data-urlencode "chat_id=\$CHAT_ID" \
+                    --data-urlencode "parse_mode=HTML" \
+                    --data-urlencode "text=❌ <b>BUILD FAILED</b>
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Stage: Check console for details
+URL: ${BUILD_URL}"
+            """
         }
+    }
 
-        always {
-            sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
-            echo "🧹 Local images cleaned up"
-        }
+    always {
+        sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
+        echo "🧹 Local images cleaned up"
     }
 }
