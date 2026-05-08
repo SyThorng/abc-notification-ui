@@ -99,43 +99,43 @@ pipeline {
     post {
     success {
         withCredentials([
-            string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-            string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-        ]) {
-            sh """
-    MSG="✅ <b>BUILD SUCCESS</b>
-    Job: ${JOB_NAME}
-    Build: #${BUILD_NUMBER}
-    Image: ${IMAGE_TAG}
-    URL: ${BUILD_URL}"
+        string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+        string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+    ]) {
+        sh """
+MSG="✅ <b>BUILD SUCCESS</b>
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Image: ${IMAGE_TAG}
+URL: ${BUILD_URL}"
 
-    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
-    --data-urlencode "chat_id=\$CHAT_ID" \
-    --data-urlencode "parse_mode=HTML" \
-    --data-urlencode "text=\$MSG"
-            """
-        }
+curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+--data-urlencode "chat_id=\$CHAT_ID" \
+--data-urlencode "parse_mode=HTML" \
+--data-urlencode "text=\$MSG"
+        """
     }
+}
 
     failure {
         withCredentials([
-            string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-            string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-        ]) {
-            sh """
-    MSG="❌ <b>BUILD FAILED</b>
-    Job: ${JOB_NAME}
-    Build: #${BUILD_NUMBER}
-    Stage: Check console for details
-    URL: ${BUILD_URL}"
+        string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+        string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+    ]) {
+        sh """
+MSG="❌ <b>BUILD FAILED</b>
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Stage: Check console for details
+URL: ${BUILD_URL}"
 
-    curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
-    --data-urlencode "chat_id=\$CHAT_ID" \
-    --data-urlencode "parse_mode=HTML" \
-    --data-urlencode "text=\$MSG"
-            """
-        }
+curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+--data-urlencode "chat_id=\$CHAT_ID" \
+--data-urlencode "parse_mode=HTML" \
+--data-urlencode "text=\$MSG"
+        """
     }
+}
 
     always {
         sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
