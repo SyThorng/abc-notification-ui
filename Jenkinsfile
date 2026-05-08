@@ -112,8 +112,7 @@ URL: $BUILD_URL"
                 '''
             }
         }
-}
-
+    }
     failure {
         withCredentials([
         string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
@@ -138,5 +137,4 @@ curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
         sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
         echo "🧹 Local images cleaned up"
     }
-}
 }
