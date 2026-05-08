@@ -107,10 +107,10 @@ pipeline {
                     --data-urlencode "chat_id=\$CHAT_ID" \
                     --data-urlencode "parse_mode=HTML" \
                     --data-urlencode "text=✅ <b>BUILD SUCCESS</b>
-Job: ${JOB_NAME}
-Build: #${BUILD_NUMBER}
-Image: ${IMAGE_TAG}
-URL: ${BUILD_URL}"
+                    Job: ${JOB_NAME}
+                    Build: #${BUILD_NUMBER}
+                    Image: ${IMAGE_TAG}
+                    URL: ${BUILD_URL}"
             """
         }
     }
@@ -125,10 +125,10 @@ URL: ${BUILD_URL}"
                     --data-urlencode "chat_id=\$CHAT_ID" \
                     --data-urlencode "parse_mode=HTML" \
                     --data-urlencode "text=❌ <b>BUILD FAILED</b>
-Job: ${JOB_NAME}
-Build: #${BUILD_NUMBER}
-Stage: Check console for details
-URL: ${BUILD_URL}"
+                    Job: ${JOB_NAME}
+                    Build: #${BUILD_NUMBER}
+                    Stage: Check console for details
+                    URL: ${BUILD_URL}"
             """
         }
     }
