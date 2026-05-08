@@ -95,25 +95,23 @@ pipeline {
     }
 
     post {
-    success {
-        withCredentials([
-        string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-        string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-    ]) {
-        sh """
-MSG="❌ <b>BUILD FAILED</b>
-Job: ${JOB_NAME}
-Build: #${BUILD_NUMBER}
-Stage: Check console for details
-Jenkins: ${BUILD_URL}
-App: http://${GCP_HOST}:${HOST_PORT}"
-
-curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
---data-urlencode "chat_id=\$CHAT_ID" \
---data-urlencode "parse_mode=HTML" \
---data-urlencode "text=\$MSG"
-        """
-    }
+     success {
+            withCredentials([
+                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+            ]) {
+                sh '''
+                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+                    -d chat_id="$CHAT_ID" \
+                    -d parse_mode="Markdown" \
+                    -d text="✅ *BUILD SUCCESS*
+Job: $JOB_NAME
+Build: #$BUILD_NUMBER
+Image: $IMAGE_TAG
+URL: $BUILD_URL"
+                '''
+            }
+        }
 }
 
     failure {
