@@ -1,5 +1,5 @@
 # ── Stage 1: Build ──────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20-alpine3.20 AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY . .
 RUN npm run build
 
 # ── Stage 2: Serve with Nginx ────────────────────────────────
-FROM nginx:1.27-alpine
+FROM nginx:1.27-alpine3.20
 
 # Remove default nginx static files
 RUN rm -rf /usr/share/nginx/html/*
