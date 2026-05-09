@@ -110,7 +110,7 @@ export default function App() {
 
       if (!res.ok) throw new Error('Transfer failed');
 
-      // ✅ Show success and close modal
+      // Show success and close modal
       // Do NOT update balance or transactions here — push notification will do it
       setTxnSuccess(true);
       setTimeout(() => {
@@ -133,7 +133,7 @@ export default function App() {
       <div className="login-screen">
         <div className="login-card">
           <div className="bank-logo">🏦</div>
-          <h1>Bank ABC ❤️</h1>
+          <h1>Bank ABC </h1>
           <p>Real-time Notification Dashboard</p>
           <input
             className="ci-input"
