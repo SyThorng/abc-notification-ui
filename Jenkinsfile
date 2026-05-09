@@ -24,7 +24,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                echo "✅ Code checked out from GitHub"
+                echo " Code checked out from GitHub"
             }
         }
 
@@ -33,7 +33,7 @@ pipeline {
                 sh """
                     docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
                 """
-                echo "✅ Docker image built: ${IMAGE_TAG}"
+                echo " Docker image built: ${IMAGE_TAG}"
             }
         }
 
@@ -46,7 +46,7 @@ pipeline {
                         --no-progress \
                         ${IMAGE_TAG} || true
                 """
-                echo "✅ Trivy scan completed"
+                echo " Trivy scan completed"
             }
         }
 
@@ -64,7 +64,7 @@ pipeline {
                         docker logout
                     '''
                 }
-                echo "✅ Image pushed: ${IMAGE_TAG}"
+                echo " Image pushed: ${IMAGE_TAG}"
             }
         }
 
