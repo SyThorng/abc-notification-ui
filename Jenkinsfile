@@ -109,6 +109,7 @@ Job: $JOB_NAME
 Build: #$BUILD_NUMBER
 Image: $IMAGE_TAG
 URL: $BUILD_URL"
+APP NAME: $GCP_HOST:3000
                 '''
             }
         }
