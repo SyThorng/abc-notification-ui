@@ -133,7 +133,7 @@ export default function App() {
       <div className="login-screen">
         <div className="login-card">
           <div className="bank-logo">🏦</div>
-          <h1> ABC BANK </h1>
+          <h1> Testing BANK </h1>
           <p>Real-time Notification Dashboard</p>
           <input
             className="ci-input"
@@ -163,7 +163,7 @@ export default function App() {
 
       {/* Header */}
       <header className="header">
-        <span className="bank-name">🏦 Testing BANK</span>
+        <span className="bank-name">🏦 ABC BANK</span>
         <span className="ci-badge">CI: {ciNo}</span>
       </header>
 
