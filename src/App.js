@@ -171,7 +171,7 @@ export default function App() {
       <div className={`balance-card ${flashType || ''}`}>
         <div className="balance-label">Available Balance</div>
         <div className="balance-usd">{formatUSD(balanceUSD)}</div>
-        <div className="balance-khr">{formatKHR(balanceUSD * KHR_RATE)}</div>
+        {/* <div className="balance-khr">{formatKHR(balanceUSD * KHR_RATE)}</div> */}
         {flashType && (
           <div className={`balance-flash ${flashType}`}>
             {flashType === 'incoming' ? '▲ Money Received' : '▼ Money Sent'}
