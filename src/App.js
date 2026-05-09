@@ -163,7 +163,7 @@ export default function App() {
 
       {/* Header */}
       <header className="header">
-        <span className="bank-name">🏦 ABC BANK</span>
+        <span className="bank-name">🏦 Testing BANK</span>
         <span className="ci-badge">CI: {ciNo}</span>
       </header>
 
