@@ -145,25 +145,31 @@
 
 pipeline {
     agent any
+    def scannerHome = tool 'SonarScanner'
+
+    tools {
+        // Must match the name you set in Jenkins Tools
+        nodejs 'NodeJS'  // remove if not needed
+    }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/SyThorng/abc-notification-ui.git'
+                git branch: 'main', url: 'https://github.com/SyThorng/abc-notification-ui'
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=my-project \
-                        -Dsonar.projectName="My Project" \
-                        -Dsonar.sources=. \
-                        -Dsonar.exclusions=**/node_modules/**,**/vendor/**
-                    '''
+                    script {
+                        def scannerHome = tool 'SonarScanner'  // must match name in Tools
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=my-project \
+                            -Dsonar.projectName='My Project' \
+                            -Dsonar.sources=."
+                    }
                 }
             }
         }
@@ -175,7 +181,6 @@ pipeline {
                 }
             }
         }
-
     }
 
     post {
