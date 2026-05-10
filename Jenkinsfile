@@ -146,12 +146,6 @@
 pipeline {
     agent any
 
-
-    tools {
-        // Must match the name you set in Jenkins Tools
-        nodejs 'NodeJS'  // remove if not needed
-    }
-
     stages {
 
         stage('Checkout') {
