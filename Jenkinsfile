@@ -160,7 +160,7 @@ pipeline {
                     sh '''
                         sonar-scanner \
                         -Dsonar.projectKey=abc-notificaton-ui \
-                        -Dsonar.projectName="Abc Notification" \
+                        -Dsonar.projectName="ABC Notificaton" \
                         -Dsonar.sources=. \
                         -Dsonar.exclusions=**/node_modules/**,**/vendor/**
                     '''
