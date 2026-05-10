@@ -145,7 +145,7 @@
 
 pipeline {
     agent any
-    def scannerHome = tool 'SonarScanner'
+
 
     tools {
         // Must match the name you set in Jenkins Tools
