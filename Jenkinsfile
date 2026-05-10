@@ -160,8 +160,8 @@ pipeline {
                     script {
                         def scannerHome = tool 'SonarScanner'  // must match name in Tools
                         sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=my-project \
-                            -Dsonar.projectName='My Project' \
+                            -Dsonar.projectKey=abc-notification-ui \
+                            -Dsonar.projectName='ABC Notification UI' \
                             -Dsonar.sources=."
                     }
                 }
