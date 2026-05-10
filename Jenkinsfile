@@ -150,7 +150,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'master', url: 'https://github.com/SyThorng/abc-notification-ui'
+                git branch: 'main', url: 'https://github.com/your-repo.git'
             }
         }
 
@@ -159,8 +159,8 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
                         sonar-scanner \
-                        -Dsonar.projectKey=abc-notificaton-ui \
-                        -Dsonar.projectName="ABC Notificaton" \
+                        -Dsonar.projectKey=my-project \
+                        -Dsonar.projectName="My Project" \
                         -Dsonar.sources=. \
                         -Dsonar.exclusions=**/node_modules/**,**/vendor/**
                     '''
