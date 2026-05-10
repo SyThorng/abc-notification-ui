@@ -3,7 +3,7 @@ import { usePushNotifications } from './hooks/usePushNotifications';
 import './App.css';
 
 const KHR_RATE = 4100;
-const password = "11112222";
+const password = "11198128931283912312222";
 const NOTIFICATION_API = 'https://mankind-juncture-paper.ngrok-free.dev/api/test';
 const TELEGRAM_BOT_USERNAME = 'ABC_BANK_Notification_Bot';
 
