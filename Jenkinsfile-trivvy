@@ -12,7 +12,7 @@ pipeline {
         TELEGRAM_CRED   = "telegram-bot-token"
         TELEGRAM_CHAT   = "telegram-chat-id"
         GCP_SSH_CRED    = "gcp-ssh-key"
-        GCP_HOST        = "34.1.199.84"
+        GCP_HOST        = "34.87.89.201"
         GCP_USER        = "hostingdevop"
         CONTAINER_NAME  = "abc-notification-ui"
         HOST_PORT       = "3000"
@@ -108,7 +108,7 @@ pipeline {
 Job: $JOB_NAME
 Build: #$BUILD_NUMBER
 Image: $IMAGE_TAG
-App: https://abc-app.sythorng.codes
+App: https://abcbank.sythorng.codes
 URL: $BUILD_URL"
                 '''
             }
@@ -135,7 +135,7 @@ curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
 
     always {
         sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
-        echo "🧹 Local images cleaned up"
-    }
-}
-}
+//         echo "🧹 Local images cleaned up"
+//     }
+// }
+// }

@@ -1,0 +1,44 @@
+
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/SyThorng/abc-notification-ui'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    script {
+                        def scannerHome = tool 'SonarScanner'  // must match name in Tools
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=abc-notification-ui \
+                            -Dsonar.projectName='ABC Notification UI' \
+                            -Dsonar.sources=."
+                    }
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'SonarQube Analysis Passed!'
+        }
+        failure {
+            echo 'SonarQube Analysis Failed!'
+        }
+    }
+}
