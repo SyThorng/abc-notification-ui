@@ -12,7 +12,7 @@ pipeline {
         TELEGRAM_CRED   = "telegram-bot-token"
         TELEGRAM_CHAT   = "telegram-chat-id"
         GCP_SSH_CRED    = "gcp-ssh-key"
-        GCP_HOST        = "34.1.199.84"
+        GCP_HOST        = "gcp-host"
         GCP_USER        = "hostingdevop"
         CONTAINER_NAME  = "abc-notification-ui"
         HOST_PORT       = "3000"
@@ -139,4 +139,3 @@ curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
     }
 }
 }
-
