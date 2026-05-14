@@ -108,7 +108,7 @@ pipeline {
 Job: $JOB_NAME
 Build: #$BUILD_NUMBER
 Image: $IMAGE_TAG
-App: https://abc-app.sythorng.codes
+App: https://abc-app.sythorng.online
 URL: $BUILD_URL"
                 '''
             }
