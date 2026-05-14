@@ -134,7 +134,7 @@ export default function App() {
       <div className="login-screen">
         <div className="login-card">
           <div className="bank-logo">🏦</div>
-          <h1> Testing BANK </h1>
+          <h1> Testing BANK 🪼</h1>
           <p>Real-time Notification Dashboard</p>
           <input
             className="ci-input"
