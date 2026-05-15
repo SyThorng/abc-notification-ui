@@ -9,4 +9,4 @@ fi
 # Git commands
 git add .
 git commit -m "testing: $1"
-git push origin main
+git push origin master
