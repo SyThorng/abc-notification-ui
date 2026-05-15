@@ -299,9 +299,9 @@ pipeline {
                 withSonarQubeEnv('SonarQube') {
                     sh """
                         ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
-                        -Dsonar.projectKey=your-project-name \
+                        -Dsonar.projectKey=abc-notification-ui \
                         -Dsonar.sources=. \
-                        -Dsonar.host.url=https://sonar-qube.sythorng.online \
+                        -Dsonar.host.url=https://sonar.sythorng.codes \
                         -Dsonar.exclusions=**/node_modules/**,**/*.test.js
                     """
                 }
@@ -318,4 +318,4 @@ pipeline {
 
         // your existing build & push stages...
     }
-}
+}s
