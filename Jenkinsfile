@@ -284,44 +284,16 @@
 
 
 pipeline {
-    agent any
-
-    environment {
-        IMAGE_NAME    = "abc-notification-ui"
-        DOCKER_HUB_ID = "sythorng"
-        IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
-        IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
-        IMAGE_LATEST  = "${IMAGE_FULL}:latest"
-
-        DOCKERHUB_CRED  = "dockerhub-credentials"
-        TELEGRAM_CRED   = "telegram-bot-token"
-        TELEGRAM_CHAT   = "telegram-chat-id"
-        GCP_SSH_CRED    = "gcp-ssh-key"
-        GCP_HOST        = "34.1.199.84"
-        GCP_USER        = "hostingdevop"
-        CONTAINER_NAME  = "abc-notification-ui"
-        HOST_PORT       = "3000"
-        CONTAINER_PORT  = "80"
-        SONAR_SCANNER_HOME = tool 'SonarQube Scanner'
-
-    }
+    
 
     stages {
 
         stage('Checkout') {
-            steps {
-                checkout scm
-                echo " Code checked out from GitHub"
-            }
+            
         }
 
         stage('Build Docker Image') {
-            steps {
-                sh """
-                    docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
-                """
-                echo " Docker image built: ${IMAGE_TAG}"
-            }
+           
         }
     }
 
@@ -344,46 +316,11 @@ pipeline {
     }
 
         stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: "${DOCKERHUB_CRED}",
-                    usernameVariable: 'DH_USER',
-                    passwordVariable: 'DH_PASS'
-                )]) {
-                    sh '''
-                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
-                        docker push $IMAGE_TAG
-                        docker push $IMAGE_LATEST
-                        docker logout
-                    '''
-                }
-                echo " Image pushed: ${IMAGE_TAG}"
-            }
+            
         }
 
         stage('Deploy to GCP Instance') {
-            steps {
-                    withCredentials([sshUserPrivateKey(
-                        credentialsId: "${GCP_SSH_CRED}",
-                        keyFileVariable: 'SSH_KEY'
-                    )]) {
-                        sh """
-                            ssh -o StrictHostKeyChecking=no \
-                                -o ConnectTimeout=30 \
-                                -i \$SSH_KEY \
-                                ${GCP_USER}@${GCP_HOST} '
-                                    docker pull ${IMAGE_LATEST}
-                                    docker stop ${CONTAINER_NAME} 2>/dev/null || true
-                                    docker rm   ${CONTAINER_NAME} 2>/dev/null || true
-                                    docker run -d \
-                                        --name ${CONTAINER_NAME} \
-                                        --restart always \
-                                        -p ${HOST_PORT}:${CONTAINER_PORT} \
-                                        ${IMAGE_LATEST}
-                                '
-                        """
-                    }
-                }
+           
         }
     }
 
@@ -401,7 +338,7 @@ pipeline {
 Job: $JOB_NAME
 Build: #$BUILD_NUMBER
 Image: $IMAGE_TAG
-App: https://abc-app.sythorng.online
+App: https://abc.sythorng.codes
 URL: $BUILD_URL"
                 '''
             }
@@ -433,3 +370,120 @@ curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
 }
 }
 
+
+
+
+pipeline {
+    agent any
+
+    environment {
+        IMAGE_NAME    = "abc-notification-ui"
+        DOCKER_HUB_ID = "sythorng"
+        IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
+        IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
+        IMAGE_LATEST  = "${IMAGE_FULL}:latest"
+
+        DOCKERHUB_CRED  = "dockerhub-credentials"
+        TELEGRAM_CRED   = "telegram-bot-token"
+        TELEGRAM_CHAT   = "telegram-chat-id"
+        GCP_SSH_CRED    = "gcp-ssh-key"
+        GCP_HOST        = "34.1.11.84"
+        GCP_USER        = "hostingdevop"
+        CONTAINER_NAME  = "abc-notification-ui"
+        HOST_PORT       = "3000"
+        CONTAINER_PORT  = "80"
+        SONAR_SCANNER_HOME = tool 'SonarQube Scanner'
+
+    }
+
+    stages {
+
+        stage('Checkout') {
+           steps {
+                checkout scm
+                echo " Code checked out from GitHub"
+            }
+        }
+
+        stage('Build Docker Image') {
+             steps {
+                sh """
+                    docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                """
+                echo " Docker image built: ${IMAGE_TAG}"
+            }
+        }
+
+        stage('SonarQube Scan') {
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    sh """
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=abc-notification-ui \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=https://sonar.sythorng.codes \
+                        -Dsonar.exclusions=**/node_modules/**,**/*.test.js
+                    """
+                }
+            }
+        }
+
+        stage('Push to Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CRED}",
+                    usernameVariable: 'DH_USER',
+                    passwordVariable: 'DH_PASS'
+                )]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker push $IMAGE_TAG
+                        docker push $IMAGE_LATEST
+                        docker logout
+                    '''
+                }
+                echo " Image pushed: ${IMAGE_TAG}"
+            }
+        }
+
+        stage('Deploy to GCP Instance') {
+             steps {
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: "${GCP_SSH_CRED}",
+                        keyFileVariable: 'SSH_KEY'
+                    )]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no \
+                                -o ConnectTimeout=30 \
+                                -i \$SSH_KEY \
+                                ${GCP_USER}@${GCP_HOST} '
+                                    docker pull ${IMAGE_LATEST}
+                                    docker stop ${CONTAINER_NAME} 2>/dev/null || true
+                                    docker rm   ${CONTAINER_NAME} 2>/dev/null || true
+                                    docker run -d \
+                                        --name ${CONTAINER_NAME} \
+                                        --restart always \
+                                        -p ${HOST_PORT}:${CONTAINER_PORT} \
+                                        ${IMAGE_LATEST}
+                                '
+                        """
+                    }
+                }
+        }
+    }
+
+    post {
+
+        success {
+            // telegram success
+        }
+
+        failure {
+            // telegram failure
+        }
+
+        always {
+            sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
+        }
+    }
+}
