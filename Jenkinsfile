@@ -302,6 +302,8 @@ pipeline {
         CONTAINER_NAME  = "abc-notification-ui"
         HOST_PORT       = "3000"
         CONTAINER_PORT  = "80"
+        SONAR_SCANNER_HOME = tool 'SonarQube Scanner'
+
     }
 
     stages {
@@ -321,9 +323,6 @@ pipeline {
                 echo " Docker image built: ${IMAGE_TAG}"
             }
         }
-
-            environment {
-        SONAR_SCANNER_HOME = tool 'SonarQube Scanner'
     }
 
     stages {
@@ -342,7 +341,6 @@ pipeline {
                 }
             }
         }
-    }
 
         stage('Push to Docker Hub') {
             steps {
