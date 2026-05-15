@@ -174,10 +174,8 @@ URL: \$URL"
         }
 
         always {
-            // FIX: use env.* to access environment variables inside post blocks
-            // Direct Groovy interpolation (${IMAGE_TAG}) fails here with MissingPropertyException
-            sh "docker rmi ${env.IMAGE_TAG} ${env.IMAGE_LATEST} 2>/dev/null || true"
-            echo "Local images cleaned up"
+            node {
+        sh "docker rmi ${env.IMAGE_TAG} ${env.IMAGE_LATEST} 2>/dev/null || true"
         }
     }
 }
