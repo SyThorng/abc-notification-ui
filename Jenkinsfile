@@ -287,24 +287,23 @@
 pipeline {
     agent any
 
+    environment {
+        SONAR_SCANNER_HOME = tool 'SonarQube Scanner'
+    }
+
     stages {
+        // your existing stages...
 
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/SyThorng/abc-notification-ui'
-            }
-        }
-
-        stage('SonarQube Analysis') {
+        stage('SonarQube Scan') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    script {
-                        def scannerHome = tool 'SonarScanner'  // must match name in Tools
-                        sh "${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=abc-notification-ui \
-                            -Dsonar.projectName='ABC Notification UI' \
-                            -Dsonar.sources=."
-                    }
+                    sh """
+                        ${SONAR_SCANNER_HOME}/bin/sonar-scanner \
+                        -Dsonar.projectKey=your-project-name \
+                        -Dsonar.sources=. \
+                        -Dsonar.host.url=https://sonar-qube.sythorng.online \
+                        -Dsonar.exclusions=**/node_modules/**,**/*.test.js
+                    """
                 }
             }
         }
@@ -316,14 +315,7 @@ pipeline {
                 }
             }
         }
-    }
 
-    post {
-        success {
-            echo 'SonarQube Analysis Passed!'
-        }
-        failure {
-            echo 'SonarQube Analysis Failed!'
-        }
+        // your existing build & push stages...
     }
 }
