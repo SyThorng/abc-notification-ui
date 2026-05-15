@@ -5,7 +5,7 @@ pipeline {
         IMAGE_NAME    = "abc-notification-ui"
         DOCKER_HUB_ID = "sythorng"
         IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
-        IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
+        IMAGE_TAG = "${IMAGE_FULL}:${BUILD_NUMBER}"
         IMAGE_LATEST  = "${IMAGE_FULL}:latest"
 
         DOCKERHUB_CRED  = "dockerhub-credentials"
