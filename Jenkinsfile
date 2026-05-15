@@ -283,11 +283,46 @@
 // }
 
 
-
 pipeline {
     agent any
 
     environment {
+        IMAGE_NAME    = "abc-notification-ui"
+        DOCKER_HUB_ID = "sythorng"
+        IMAGE_FULL    = "${DOCKER_HUB_ID}/${IMAGE_NAME}"
+        IMAGE_TAG     = "${IMAGE_FULL}:${BUILD_NUMBER}"
+        IMAGE_LATEST  = "${IMAGE_FULL}:latest"
+
+        DOCKERHUB_CRED  = "dockerhub-credentials"
+        TELEGRAM_CRED   = "telegram-bot-token"
+        TELEGRAM_CHAT   = "telegram-chat-id"
+        GCP_SSH_CRED    = "gcp-ssh-key"
+        GCP_HOST        = "34.1.199.84"
+        GCP_USER        = "hostingdevop"
+        CONTAINER_NAME  = "abc-notification-ui"
+        HOST_PORT       = "3000"
+        CONTAINER_PORT  = "80"
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+                echo " Code checked out from GitHub"
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh """
+                    docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
+                """
+                echo " Docker image built: ${IMAGE_TAG}"
+            }
+        }
+
+            environment {
         SONAR_SCANNER_HOME = tool 'SonarQube Scanner'
     }
 
@@ -307,15 +342,95 @@ pipeline {
                 }
             }
         }
+    }
 
-        stage('Quality Gate') {
+        stage('Push to Docker Hub') {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                withCredentials([usernamePassword(
+                    credentialsId: "${DOCKERHUB_CRED}",
+                    usernameVariable: 'DH_USER',
+                    passwordVariable: 'DH_PASS'
+                )]) {
+                    sh '''
+                        echo "$DH_PASS" | docker login -u "$DH_USER" --password-stdin
+                        docker push $IMAGE_TAG
+                        docker push $IMAGE_LATEST
+                        docker logout
+                    '''
                 }
+                echo " Image pushed: ${IMAGE_TAG}"
             }
         }
 
-        // your existing build & push stages...
+        stage('Deploy to GCP Instance') {
+            steps {
+                    withCredentials([sshUserPrivateKey(
+                        credentialsId: "${GCP_SSH_CRED}",
+                        keyFileVariable: 'SSH_KEY'
+                    )]) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no \
+                                -o ConnectTimeout=30 \
+                                -i \$SSH_KEY \
+                                ${GCP_USER}@${GCP_HOST} '
+                                    docker pull ${IMAGE_LATEST}
+                                    docker stop ${CONTAINER_NAME} 2>/dev/null || true
+                                    docker rm   ${CONTAINER_NAME} 2>/dev/null || true
+                                    docker run -d \
+                                        --name ${CONTAINER_NAME} \
+                                        --restart always \
+                                        -p ${HOST_PORT}:${CONTAINER_PORT} \
+                                        ${IMAGE_LATEST}
+                                '
+                        """
+                    }
+                }
+        }
     }
-}s
+
+    post {
+    success {
+            withCredentials([
+                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+            ]) {
+                sh '''
+                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
+                    -d chat_id="$CHAT_ID" \
+                    -d parse_mode="Markdown" \
+                    -d text="✅ *BUILD SUCCESS*
+Job: $JOB_NAME
+Build: #$BUILD_NUMBER
+Image: $IMAGE_TAG
+App: https://abc-app.sythorng.online
+URL: $BUILD_URL"
+                '''
+            }
+        }
+    failure {
+        withCredentials([
+        string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
+        string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
+    ]) {
+        sh """
+MSG="❌ <b>BUILD FAILED</b>
+Job: ${JOB_NAME}
+Build: #${BUILD_NUMBER}
+Stage: Check console for details
+URL: ${BUILD_URL}"
+
+curl -s -X POST "https://api.telegram.org/bot\$BOT_TOKEN/sendMessage" \
+--data-urlencode "chat_id=\$CHAT_ID" \
+--data-urlencode "parse_mode=HTML" \
+--data-urlencode "text=\$MSG"
+        """
+    }
+}
+
+    always {
+        sh "docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true"
+        echo "🧹 Local images cleaned up"
+    }
+}
+}
+
