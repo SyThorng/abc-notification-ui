@@ -53,16 +53,12 @@ pipeline {
         }
 
         stage('SonarQube Code Analysis') {
-            agent {
-                node {
-                    label 'slave-01'
-                }
-            }
+            agent any
             steps {
                 echo "🔍 Running SonarQube analysis..."
                 script {
                     try {
-                        withSonarQubeEnv('sonar-qube') {  // ← Change this
+                        withSonarQubeEnv('sonar-qube') {
                             sh '''
                                 sonar-scanner \
                                     -Dsonar.projectKey=${PROJECT_KEY} \
@@ -92,7 +88,7 @@ pipeline {
                 echo "⚖️  Checking SonarQube Quality Gate..."
                 script {
                     try {
-                        withSonarQubeEnv('sonar-qube') {  // ← Change this too
+                        withSonarQubeEnv('sonar-qube') {
                             sh 'echo "Quality Gate check passed"'
                         }
                         echo "✅ Quality Gate check passed"
@@ -104,7 +100,6 @@ pipeline {
                 }
             }
         }
-
         stage('Push to Docker Hub') {
             // Push from Slave back to Docker registry
             agent {
