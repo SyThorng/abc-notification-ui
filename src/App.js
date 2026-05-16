@@ -5,7 +5,6 @@ import './App.css';
 const KHR_RATE = 4100;
 const NOTIFICATION_API = 'https://mankind-juncture-paper.ngrok-free.dev/api/test';
 const TELEGRAM_BOT_USERNAME = 'ABC_BANK_Notification_Bot';
-const password = 'abc123'; // For demo purposes only. Do NOT use hardcoded passwords in production.
 
 function formatUSD(amount) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
@@ -134,7 +133,7 @@ export default function App() {
       <div className="login-screen">
         <div className="login-card">
           <div className="bank-logo">🏦</div>
-          <h1> Testinggg BANK 🪼</h1>
+          <h1> Testing BANK 🪼</h1>
           <p>Real-time Notification Dashboard</p>
           <input
             className="ci-input"
