@@ -165,77 +165,60 @@ pipeline {
     }
 
     post {
-        success {
-            echo "✅ Pipeline execution SUCCESS"
-            // Send success notification via Telegram
-            withCredentials([
-                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-            ]) {
-                sh '''
-                    TELEGRAM_MESSAGE="✅ *BUILD & DEPLOYMENT SUCCESS*
-📋 Job: $JOB_NAME
-🔢 Build: #$BUILD_NUMBER
-🐳 Image: $IMAGE_TAG
-🌐 App: https://abc-app.sythorng.codes
-🔗 Jenkins URL: $BUILD_URL
-⏱️ Duration: $BUILD_DURATION ms"
-
-                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-                    -d chat_id="$CHAT_ID" \
-                    -d parse_mode="Markdown" \
-                    -d text="$TELEGRAM_MESSAGE"
-                    
-                    echo "📢 Success notification sent to Telegram"
-                '''
-            }
-        }
-
-        failure {
-            echo "❌ Pipeline execution FAILED"
-            // Send failure notification via Telegram
-            withCredentials([
-                string(credentialsId: "${TELEGRAM_CRED}", variable: 'BOT_TOKEN'),
-                string(credentialsId: "${TELEGRAM_CHAT}",  variable: 'CHAT_ID')
-            ]) {
-                sh '''
-                    TELEGRAM_MESSAGE="❌ *BUILD OR DEPLOYMENT FAILED*
-📋 Job: $JOB_NAME
-🔢 Build: #$BUILD_NUMBER
-⚠️ Check console for details
-🔗 Jenkins URL: $BUILD_URL
-📊 Common reasons:
-   • SonarQube Quality Gate failed
-   • Docker image build failed
-   • SSH deployment failed
-   • Docker Hub push failed"
-
-                    curl -s -X POST "https://api.telegram.org/bot$BOT_TOKEN/sendMessage" \
-                    --data-urlencode "chat_id=$CHAT_ID" \
-                    --data-urlencode "parse_mode=Markdown" \
-                    --data-urlencode "text=$TELEGRAM_MESSAGE"
-                    
-                    echo "📢 Failure notification sent to Telegram"
-                '''
-            }
-        }
-
         always {
             echo "🧹 Cleaning up resources on slave-01..."
-            // Clean up on slave
             node('slave-01') {
-                sh """
+                sh '''
                     echo "Removing local Docker images..."
-                    docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true
-                    docker system prune -f 2>/dev/null || true
+                    docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} || true
+                    docker system prune -f || true
                     echo "✅ Cleanup completed"
-                """
+                '''
             }
-            
-            // Archive logs and reports
-            echo "📁 Archiving build artifacts..."
-            archiveArtifacts artifacts: '**/target/**.jar,**/**.log', 
-                             allowEmptyArchive: true
+        }
+        
+        success {
+            echo "✅ Pipeline execution SUCCESS"
+            withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'BOT_TOKEN'),
+                            string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
+                sh '''
+                    TELEGRAM_MESSAGE="✅ *BUILD SUCCESSFUL*
+    📋 Job: ${JOB_NAME}
+    🔢 Build: #${BUILD_NUMBER}
+    🔗 Jenkins URL: ${BUILD_URL}
+    ⏱️  Duration: ${BUILD_DURATION}
+    📝 Commit: ${GIT_COMMIT:0:7}"
+                    
+                    curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
+                        --data-urlencode chat_id=${CHAT_ID} \
+                        --data-urlencode parse_mode=Markdown \
+                        --data-urlencode text="${TELEGRAM_MESSAGE}"
+                '''
+            }
+        }
+        
+        failure {
+            echo "❌ Pipeline execution FAILED"
+            withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'BOT_TOKEN'),
+                            string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
+                sh '''
+                    TELEGRAM_MESSAGE="❌ *BUILD FAILED*
+    📋 Job: ${JOB_NAME}
+    🔢 Build: #${BUILD_NUMBER}
+    ⚠️  Check console for details
+    🔗 Jenkins URL: ${BUILD_URL}
+    📊 Common reasons:
+    • Docker build failed
+    • SonarQube Quality Gate failed
+    • Docker Hub push failed
+    • Deployment failed"
+                    
+                    curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
+                        --data-urlencode chat_id=${CHAT_ID} \
+                        --data-urlencode parse_mode=Markdown \
+                        --data-urlencode text="${TELEGRAM_MESSAGE}"
+                '''
+            }
         }
     }
 }
