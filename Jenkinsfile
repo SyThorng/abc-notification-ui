@@ -38,7 +38,6 @@ pipeline {
             agent {
                 node {
                     label 'slave-01'
-                    // Remove customWorkspace - use default
                 }
             }
             steps {
@@ -52,7 +51,7 @@ pipeline {
         }
 
         stage('SonarQube Code Analysis') {
-            agent any  // Run on Jenkins master
+            agent any
             steps {
                 echo "🔍 Running SonarQube analysis..."
                 script {
@@ -69,14 +68,13 @@ pipeline {
                         echo "✅ SonarQube analysis completed"
                     } catch (Exception e) {
                         echo "⚠️  SonarQube analysis warning: ${e.message}"
-                        // Don't fail the build yet
                     }
                 }
             }
         }
 
         stage('Quality Gate Check') {
-            agent any  // Run on Jenkins master
+            agent any
             steps {
                 echo "⚖️  Checking SonarQube Quality Gate..."
                 script {
@@ -95,7 +93,6 @@ pipeline {
         }
 
         stage('Push to Docker Hub') {
-            // Push from Slave back to Docker registry
             agent {
                 node {
                     label 'slave-01'
@@ -126,7 +123,6 @@ pipeline {
         }
 
         stage('Deploy to GCP Instance') {
-            // Deploy can run on master (SSH doesn't need local Docker)
             agent any
             steps {
                 echo "🚀 Deploying to GCP Instance..."
@@ -165,6 +161,18 @@ pipeline {
     }
 
     post {
+        always {
+            echo "🧹 Cleaning up resources on slave-01..."
+            node('slave-01') {
+                sh '''
+                    echo "Removing local Docker images..."
+                    docker rmi $IMAGE_TAG $IMAGE_LATEST || true
+                    docker system prune -f || true
+                    echo "✅ Cleanup completed"
+                '''
+            }
+        }
+
         success {
             echo "✅ Pipeline execution SUCCESS"
             withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'BOT_TOKEN'),
@@ -174,7 +182,6 @@ pipeline {
 📋 Job: ${JOB_NAME}
 🔢 Build: #${BUILD_NUMBER}
 🔗 Jenkins URL: ${BUILD_URL}
-⏱️ Duration: ${BUILD_DURATION}
 📝 Commit: ${GIT_COMMIT:0:7}"
                     
                     curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
@@ -184,8 +191,8 @@ pipeline {
                 '''
             }
         }
-    
-    failure {
+
+        failure {
             echo "❌ Pipeline execution FAILED"
             withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'BOT_TOKEN'),
                             string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
