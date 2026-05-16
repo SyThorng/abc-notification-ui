@@ -36,11 +36,10 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-            // Run on Jenkins Slave for resource-intensive tasks
             agent {
                 node {
                     label 'slave-01'
-                    customWorkspace "/var/jenkins_home/workspace/${JOB_NAME}/${BUILD_NUMBER}"
+                    // Remove customWorkspace - use default
                 }
             }
             steps {
