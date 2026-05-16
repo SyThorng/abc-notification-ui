@@ -167,9 +167,9 @@ pipeline {
                             string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
                 sh '''
                     TELEGRAM_MESSAGE="✅ BUILD SUCCESSFUL
-    📋 Job: ${JOB_NAME}
-    🔢 Build: #${BUILD_NUMBER}
-    🔗 Jenkins URL: ${BUILD_URL}"
+📋 Job: ${JOB_NAME}
+🔢 Build: #${BUILD_NUMBER}
+🔗 Jenkins URL: abc.sythorng.codes"
                     
                     curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
                         --data-urlencode chat_id=${CHAT_ID} \
@@ -185,15 +185,15 @@ pipeline {
                             string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
                 sh '''
                     TELEGRAM_MESSAGE="❌ BUILD FAILED
-    📋 Job: ${JOB_NAME}
-    🔢 Build: #${BUILD_NUMBER}
-    ⚠️ Check console for details
-    🔗 Jenkins URL: ${BUILD_URL}
-    📊 Common reasons:
-    - Docker build failed
-    - SonarQube Quality Gate failed
-    - Docker Hub push failed
-    - Deployment failed"
+📋 Job: ${JOB_NAME}
+🔢 Build: #${BUILD_NUMBER}
+⚠️ Check console for details
+🔗 Jenkins URL: ${BUILD_URL}
+📊 Common reasons: 
+- Docker build failed
+- SonarQube Quality Gate failed
+- Docker Hub push failed
+- Deployment failed"
 
                     curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
                         --data-urlencode chat_id=${CHAT_ID} \
