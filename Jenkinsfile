@@ -52,58 +52,31 @@ pipeline {
             }
         }
 
-        // stage('SonarQube Code Analysis') {
-        //     agent {
-        //         node {
-        //             label 'slave-01'
-        //         }
-        //     }
-        //     steps {
-        //         echo "🔍 Running SonarQube analysis..."
-        //         script {
-        //             try {
-        //                 withSonarQubeEnv('sonar-qube') {
-        //                     sh '''
-        //                         sonar-scanner \
-        //                             -Dsonar.projectKey=${PROJECT_KEY} \
-        //                             -Dsonar.sources=src \
-        //                             -Dsonar.host.url=${SONARQUBE_HOST} \
-        //                             -Dsonar.login=${SONARQUBE_TOKEN} \
-        //                             -Dsonar.qualitygate.wait=true
-        //                     '''
-        //                 }
-        //                 echo "✅ SonarQube analysis completed successfully"
-        //             } catch (Exception e) {
-        //                 echo "❌ SonarQube analysis failed: ${e.message}"
-        //                 currentBuild.result = 'FAILURE'
-        //                 throw e
-        //             }
-        //         }
-        //     }
-        // }
-
-        // stage('Quality Gate Check') {
-        //     agent {
-        //         node {
-        //             label 'slave-01'
-        //         }
-        //     }
-        //     steps {
-        //         echo "⚖️  Checking SonarQube Quality Gate..."
-        //         script {
-        //             try {
-        //                 withSonarQubeEnv('sonar-qube') {
-        //                     sh 'echo "Quality Gate check passed"'
-        //                 }
-        //                 echo "✅ Quality Gate check passed"
-        //             } catch (Exception e) {
-        //                 echo "❌ Quality Gate check failed"
-        //                 currentBuild.result = 'FAILURE'
-        //                 throw e
-        //             }
-        //         }
-        //     }
-        // }
+        stage('SonarQube Code Analysis') {
+            agent any  // Run on master
+            steps {
+                echo "🔍 Running SonarQube analysis..."
+                script {
+                    try {
+                        withSonarQubeEnv('sonar-qube') {
+                            sh '''
+                                /opt/sonar-scanner/bin/sonar-scanner \
+                                    -Dsonar.projectKey=${PROJECT_KEY} \
+                                    -Dsonar.sources=src \
+                                    -Dsonar.host.url=${SONARQUBE_HOST} \
+                                    -Dsonar.login=${SONARQUBE_TOKEN} \
+                                    -Dsonar.qualitygate.wait=true
+                            '''
+                        }
+                        echo "✅ SonarQube analysis completed successfully"
+                    } catch (Exception e) {
+                        echo "❌ SonarQube analysis failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
+                }
+            }
+        }
         stage('Push to Docker Hub') {
             // Push from Slave back to Docker registry
             agent {
