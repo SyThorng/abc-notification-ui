@@ -161,28 +161,15 @@ pipeline {
     }
 
     post {
-        always {
-            echo "🧹 Cleaning up resources on slave-01..."
-            node('slave-01') {
-                sh '''
-                    echo "Removing local Docker images..."
-                    docker rmi $IMAGE_TAG $IMAGE_LATEST || true
-                    docker system prune -f || true
-                    echo "✅ Cleanup completed"
-                '''
-            }
-        }
-
         success {
             echo "✅ Pipeline execution SUCCESS"
             withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'BOT_TOKEN'),
                             string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
                 sh '''
                     TELEGRAM_MESSAGE="✅ BUILD SUCCESSFUL
-📋 Job: ${JOB_NAME}
-🔢 Build: #${BUILD_NUMBER}
-🔗 Jenkins URL: ${BUILD_URL}
-📝 Commit: ${GIT_COMMIT:0:7}"
+    📋 Job: ${JOB_NAME}
+    🔢 Build: #${BUILD_NUMBER}
+    🔗 Jenkins URL: ${BUILD_URL}"
                     
                     curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
                         --data-urlencode chat_id=${CHAT_ID} \
@@ -198,15 +185,15 @@ pipeline {
                             string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
                 sh '''
                     TELEGRAM_MESSAGE="❌ BUILD FAILED
-📋 Job: ${JOB_NAME}
-🔢 Build: #${BUILD_NUMBER}
-⚠️ Check console for details
-🔗 Jenkins URL: ${BUILD_URL}
-📊 Common reasons:
-- Docker build failed
-- SonarQube Quality Gate failed
-- Docker Hub push failed
-- Deployment failed"
+    📋 Job: ${JOB_NAME}
+    🔢 Build: #${BUILD_NUMBER}
+    ⚠️ Check console for details
+    🔗 Jenkins URL: ${BUILD_URL}
+    📊 Common reasons:
+    - Docker build failed
+    - SonarQube Quality Gate failed
+    - Docker Hub push failed
+    - Deployment failed"
 
                     curl -s -X POST https://api.telegram.org/bot${BOT_TOKEN}/sendMessage \
                         --data-urlencode chat_id=${CHAT_ID} \
@@ -217,3 +204,4 @@ pipeline {
         }
     }
 }
+    
