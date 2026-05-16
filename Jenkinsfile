@@ -30,7 +30,7 @@ pipeline {
             steps {
                 echo "📥 Checking out code from GitHub..."
                 checkout scm
-                echo "✅ Code checked out successfully"
+                echo "Code checked out successfully"
             }
         }
 
@@ -44,7 +44,7 @@ pipeline {
                 echo "🐳 Building Docker image on slave-01..."
                 sh """
                     docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
-                    echo "✅ Docker image built: ${IMAGE_TAG}"
+                    echo "Docker image built: ${IMAGE_TAG}"
                     docker images | grep ${IMAGE_NAME}
                 """
             }
@@ -65,9 +65,9 @@ pipeline {
                                     -Dsonar.qualitygate.wait=false
                             '''
                         }
-                        echo "✅ SonarQube analysis completed"
+                        echo "SonarQube analysis completed"
                     } catch (Exception e) {
-                        echo "⚠️  SonarQube analysis warning: ${e.message}"
+                        echo "SonarQube analysis warning: ${e.message}"
                     }
                 }
             }
@@ -82,9 +82,9 @@ pipeline {
                         withSonarQubeEnv('sonar-qube') {
                             sh 'echo "Quality Gate check passed"'
                         }
-                        echo "✅ Quality Gate check passed"
+                        echo "Quality Gate check passed"
                     } catch (Exception e) {
-                        echo "❌ Quality Gate check failed"
+                        echo "Quality Gate check failed"
                         currentBuild.result = 'FAILURE'
                         throw e
                     }
@@ -116,7 +116,7 @@ pipeline {
                         echo "Logging out..."
                         docker logout
                         
-                        echo "✅ Image pushed successfully"
+                        echo "Image pushed successfully"
                     '''
                 }
             }
@@ -155,14 +155,14 @@ pipeline {
                             '
                     """
                 }
-                echo "✅ Deployment completed"
+                echo "Deployment completed"
             }
         }
     }
 
     post {
         success {
-            echo "✅ Pipeline execution SUCCESS"
+            echo "Pipeline execution SUCCESS"
             withCredentials([string(credentialsId: 'telegram-bot-token', variable: 'BOT_TOKEN'),
                             string(credentialsId: 'telegram-chat-id', variable: 'CHAT_ID')]) {
                 sh '''
