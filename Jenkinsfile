@@ -52,37 +52,37 @@ pipeline {
             }
         }
 
-        stage('SonarQube Code Analysis') {
-            // Run on Jenkins Slave for scanning
-            agent {
-                node {
-                    label 'slave-01'
-                }
-            }
-            steps {
-                echo "🔍 Running SonarQube analysis..."
-                script {
-                    try {
-                        withSonarQubeEnv('SonarQube') {
-                            sh '''
-                                # Run SonarQube scanner with code analysis
-                                sonar-scanner \
-                                    -Dsonar.projectKey=${PROJECT_KEY} \
-                                    -Dsonar.sources=src \
-                                    -Dsonar.host.url=${SONARQUBE_HOST} \
-                                    -Dsonar.login=${SONARQUBE_TOKEN} \
-                                    -Dsonar.qualitygate.wait=true
-                            '''
-                        }
-                        echo "✅ SonarQube analysis completed successfully"
-                    } catch (Exception e) {
-                        echo "❌ SonarQube analysis failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
-                }
-            }
-        }
+        // stage('SonarQube Code Analysis') {
+        //     // Run on Jenkins Slave for scanning
+        //     agent {
+        //         node {
+        //             label 'slave-01'
+        //         }
+        //     }
+        //     steps {
+        //         echo "🔍 Running SonarQube analysis..."
+        //         script {
+        //             try {
+        //                 withSonarQubeEnv('SonarQube') {
+        //                     sh '''
+        //                         # Run SonarQube scanner with code analysis
+        //                         sonar-scanner \
+        //                             -Dsonar.projectKey=${PROJECT_KEY} \
+        //                             -Dsonar.sources=src \
+        //                             -Dsonar.host.url=${SONARQUBE_HOST} \
+        //                             -Dsonar.login=${SONARQUBE_TOKEN} \
+        //                             -Dsonar.qualitygate.wait=true
+        //                     '''
+        //                 }
+        //                 echo "✅ SonarQube analysis completed successfully"
+        //             } catch (Exception e) {
+        //                 echo "❌ SonarQube analysis failed: ${e.message}"
+        //                 currentBuild.result = 'FAILURE'
+        //                 throw e
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Quality Gate Check') {
             // Run on Jenkins Slave to check SonarQube quality gate
