@@ -22,8 +22,6 @@ pipeline {
         PROJECT_KEY = 'abc-notification-ui'
         SONARQUBE_HOST = 'https://sonar.sythorng.codes'
         IMAGE_NAME = 'sythorng/abc-notification-ui'
-        IMAGE_TAG = "${IMAGE_NAME}:${BUILD_NUMBER}"
-        IMAGE_LATEST = "${IMAGE_NAME}:latest"
     }
 
     stages {
@@ -242,5 +240,4 @@ pipeline {
         }
     }
 }
-
 
