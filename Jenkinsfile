@@ -53,7 +53,11 @@ pipeline {
         }
 
         stage('SonarQube Code Analysis') {
-            agent any
+            agent {
+                node {
+                    label 'slave-01'
+                }
+            }
             steps {
                 echo "🔍 Running SonarQube analysis..."
                 script {
