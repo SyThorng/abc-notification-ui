@@ -21,7 +21,6 @@ pipeline {
         // SonarQube Configuration
         PROJECT_KEY = 'abc-notification-ui'
         SONARQUBE_HOST = 'https://sonar.sythorng.codes'
-        IMAGE_NAME = 'sythorng/abc-notification-ui'
     }
 
     stages {
