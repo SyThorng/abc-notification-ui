@@ -39,12 +39,12 @@ pipeline {
             // Run on Jenkins Slave for resource-intensive tasks
             agent {
                 node {
-                    label 'slave01'
+                    label 'slave-01'
                     customWorkspace "/var/jenkins_home/workspace/${JOB_NAME}/${BUILD_NUMBER}"
                 }
             }
             steps {
-                echo "🐳 Building Docker image on slave01..."
+                echo "🐳 Building Docker image on slave-01..."
                 sh """
                     docker build -t ${IMAGE_TAG} -t ${IMAGE_LATEST} .
                     echo "✅ Docker image built: ${IMAGE_TAG}"
@@ -57,7 +57,7 @@ pipeline {
             // Run on Jenkins Slave for scanning
             agent {
                 node {
-                    label 'slave01'
+                    label 'slave-01'
                 }
             }
             steps {
@@ -89,7 +89,7 @@ pipeline {
             // Run on Jenkins Slave to check SonarQube quality gate
             agent {
                 node {
-                    label 'slave01'
+                    label 'slave-01'
                 }
             }
             steps {
@@ -140,7 +140,7 @@ pipeline {
             // Push from Slave back to Docker registry
             agent {
                 node {
-                    label 'slave01'
+                    label 'slave-01'
                 }
             }
             steps {
@@ -219,7 +219,7 @@ pipeline {
 📋 Job: $JOB_NAME
 🔢 Build: #$BUILD_NUMBER
 🐳 Image: $IMAGE_TAG
-🌐 App: https://abc-app.sythorng.online
+🌐 App: https://abc-app.sythorng.codes
 🔗 Jenkins URL: $BUILD_URL
 ⏱️ Duration: $BUILD_DURATION ms"
 
@@ -263,9 +263,9 @@ pipeline {
         }
 
         always {
-            echo "🧹 Cleaning up resources on slave01..."
+            echo "🧹 Cleaning up resources on slave-01..."
             // Clean up on slave
-            node('slave01') {
+            node('slave-01') {
                 sh """
                     echo "Removing local Docker images..."
                     docker rmi ${IMAGE_TAG} ${IMAGE_LATEST} 2>/dev/null || true
