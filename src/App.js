@@ -3,7 +3,7 @@ import { usePushNotifications } from './hooks/usePushNotifications';
 import './App.css';
 
 const KHR_RATE = 4100;
-const NOTIFICATION_API = 'https://mankind-juncture-paper.ngrok-free.dev/api/test';
+const NOTIFICATION_API = 'http://localhost:8081/api/test';
 const TELEGRAM_BOT_USERNAME = 'ABC_BANK_Notification_Bot';
 
 function formatUSD(amount) {
@@ -133,7 +133,7 @@ export default function App() {
       <div className="login-screen">
         <div className="login-card">
           <div className="bank-logo">🏦</div>
-          <h1> Testing 123 BANK 🪼</h1>
+          <h1> ABC BANK 🪼</h1>
           <p>Real-time Notification Dashboard</p>
           <input
             className="ci-input"

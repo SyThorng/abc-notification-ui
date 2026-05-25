@@ -1,0 +1,7 @@
+---
+- name: Ping host
+  ping:
+
+- name: Print connection info
+  debug:
+    msg: "Connected to {{ inventory_hostname }} ({{ ansible_host | default(inventory_hostname) }})"
