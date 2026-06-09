@@ -497,3 +497,50 @@ body {
   background: #0277bd;
   color: white;
 }
+
+/* ── Language Selector ─────────────────────────────────── */
+/* ADD these styles to the bottom of your App.css */
+
+.lang-selector {
+  display: flex;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.lang-selector-login {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.lang-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.lang-btn:hover {
+  background: rgba(255,255,255,0.25);
+  transform: scale(1.1);
+}
+
+.lang-btn.active {
+  border-color: white;
+  background: rgba(255,255,255,0.3);
+}
+
+.lang-selector-login .lang-btn {
+  background: #f0f2f5;
+  border-color: #e0e0e0;
+}
+
+.lang-selector-login .lang-btn.active {
+  border-color: #003087;
+  background: #e8eef8;
+}
